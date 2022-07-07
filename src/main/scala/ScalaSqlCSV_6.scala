@@ -26,13 +26,13 @@ object ScalaSqlCSV_6 {
       spark.sql("select genres,vote_average from tbl_movies ")
     val array = sqlresult_type.collect
     val map_num = mutable.Map(("Fantasy",0))//typenum
-    val map_name = mutable.Map(("Fantasy", 0))
+    val map_name = mutable.Map(("Fantasy", 0.00))
 
 
     for (i <- 0 to array.length - 1) {
       val jsonArray = array(i)(0).toString//genres
       val parseJsonArray = JSON.parseArray(jsonArray)
-      val vote_average = array(i)(1).toString.toInt//revenue
+      val vote_average = array(i)(1).toString.toDouble//revenue
 
       //遍历
       for (i <- 0 until parseJsonArray.size) {
