@@ -3,10 +3,11 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row, SaveMode, SparkSession}
 import com.alibaba.fastjson.JSON
 import scala.collection.mutable
 
-object ScalaSqlCSV_5 {
+object SparkSqlCSV_4 {
   def main(args: Array[String]): Unit = {
     //1.创建Spark环境配置对象
     val conf = new SparkConf().setAppName("SparkSqlMovie").setMaster("local")
+
     //2.创建SparkSession对象
     val spark: SparkSession = SparkSession.builder().config(conf).getOrCreate()
 
@@ -23,55 +24,56 @@ object ScalaSqlCSV_5 {
 
     //4.查询操作
     val sqlresult_type: DataFrame =
-      spark.sql("select genres,revenue from tbl_movies ")
+      spark.sql("select production_countries from tbl_movies ")
     val array = sqlresult_type.collect
-    val map_name = mutable.Map(("Fantasy", 0:Long))
+    val map_area = mutable.Map(("CN", 0))
+    val map_name = mutable.Map(("CN", "China"))
 
-
-    val regex="""^\d+$""".r
-    def IsNumber(str: String) = {
-      var flag = true
-      for (i <- 0 until str.length) {
-        if ("0123456789".indexOf(str.charAt(i)) < 0) flag = false
-      }
-      flag
-    }
-
-    for (i <- 0 to array.length - 1) {
-      val jsonArray = array(i)(0).toString //genres
-      val parseJsonArray = JSON.parseArray(jsonArray)
-      val revenue0 = array(i)(1).toString
-      if (IsNumber(revenue0)) {
-        val revenue = array(i)(1).toString.toLong
-
+    for(i <- 0 to array.length-1){
+      for(j <- 0 to array(i).length-1){
+        val jsonArray = array(i)(j).toString
+        val parseJsonArray = JSON.parseArray(jsonArray)
         //遍历
-        for (i <- 0 until parseJsonArray.size) {
+        for (i <- 0 until parseJsonArray.size){
           val jsonObject = parseJsonArray.getJSONObject(i)
+          val short = jsonObject.getString("iso_3166_1")
           val name = jsonObject.getString("name")
 
-          //票房统计
-          if (map_name.contains(name)) map_name(name) = map_name(name) + revenue
-          else map_name += (name -> revenue)
+          if(map_area.contains(short)) map_area(short)=map_area(short)+1
+          else map_area+=(short->1)
+
+          map_name += (short->name)
         }
       }
     }
 
-    for ((k, v) <- map_name) {
+    for ((k, v) <- map_area) {
       println("(k,v)：" + k + "===" + v)
     }
 
-    val df1 = map_name.toSeq.toDF("type", "revenue")
-    df1.createOrReplaceTempView("tbl_type_revenue")
-    df1.show(50)
+    val df1 = map_area.toSeq.toDF("short", "num")
+    df1.createOrReplaceTempView("tbl_short_num")
+
+    val df2 = map_name.toSeq.toDF("short", "name")
+    df2.createOrReplaceTempView("tbl_short_name")
+
+    val sqlresult_area :DataFrame=
+      spark.sql( "SELECT tbl_short_num.short,name,num " +
+        "FROM tbl_short_num JOIN tbl_short_name " +
+        "ON tbl_short_num.short = tbl_short_name.short")
+    df1.show()
+    df2.show()
+    sqlresult_area.show()
 
     //5.将分析结果保存到数据表中
     df1.write
       .format("jdbc")
       .option("url", "jdbc:mysql://localhost:3306/sparkdb")
       .option("user", "root")
-      .option("password", "100708007sM")
-      .option("dbtable", "tbl_movies_type_revenue")
+      .option("password", "123456")
+      .option("dbtable", "movies_area_num")
       .mode(SaveMode.Append)
       .save()
   }
 }
+

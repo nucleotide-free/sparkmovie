@@ -3,15 +3,14 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row, SaveMode, SparkSession}
 import com.alibaba.fastjson.JSON
 import scala.collection.mutable
 
-object ScalaSqlCSV_6 {
+object SparkSqlCSV_6 {
   def main(args: Array[String]): Unit = {
     //1.创建Spark环境配置对象
     val conf = new SparkConf().setAppName("SparkSqlMovie").setMaster("local")
+
     //2.创建SparkSession对象
     val spark: SparkSession = SparkSession.builder().config(conf).getOrCreate()
-
     import spark.implicits._
-
     var commentData: DataFrame = spark.read.format("csv")
       .option("header", true)
       .option("multiLine", true)
@@ -27,7 +26,6 @@ object ScalaSqlCSV_6 {
     val array = sqlresult_type.collect
     val map_num = mutable.Map(("Fantasy",0))//typenum
     val map_name = mutable.Map(("Fantasy", 0.00))
-
 
     val regex="""^\d+$""".r
     def IsNumber(str: String) = {
@@ -75,8 +73,8 @@ object ScalaSqlCSV_6 {
       .format("jdbc")
       .option("url", "jdbc:mysql://localhost:3306/sparkdb")
       .option("user", "root")
-      .option("password", "100708007sM")
-      .option("dbtable", "tbl_movies_type_vote")
+      .option("password", "123456")
+      .option("dbtable", "movies_type_vote")
       .mode(SaveMode.Append)
       .save()
   }
