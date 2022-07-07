@@ -1,3 +1,5 @@
+package SparkOnHDFS
+
 import net.minidev.json.{JSONArray, JSONObject}
 import net.minidev.json.parser.JSONParser
 import org.apache.spark.SparkConf
@@ -8,22 +10,6 @@ import org.apache.spark.sql.SparkSession
 import scala.collection.mutable
 import scala.xml.XML.parser
 
-/**
- * 知识点:
- *   SparkSQL:
- *   1)加载数据 (csv,jdbc,json,txt....)
- *     spark.read.
- *           format(" "): 加载的数据类型 csv,jdbc,json
- *           option(".."): //如果读取jdbc数据源，设置jdbc相应的参数driver,url,user,password,dbtable
- *           load("") :// 如果是csv,json文件，设定加载文件的路径
- *
- *   Spark sql读取csv文件
- *         src\\input\\comments.csv文件
- *
- *   虚拟机运行命令:
- *   1. ./bin/spark-submit --class SparkSqlCSVExample --master local sparksqlexample-1.0-SNAPSHOT.jar
- *   2.
- */
 object SparkSqlCSVExample {
 
 
@@ -45,13 +31,13 @@ object SparkSqlCSVExample {
     //3.注册临时表
     commentData.createOrReplaceTempView("tbl_movies")
     //4.查询操作
+    //————————————————————1-电影数量统计——————————————————————
     val sqlresult_type :DataFrame=
-      spark.sql("select genres " +
-        "   from tbl_movies ")
-    var array = sqlresult_type.collect
+      spark.sql("select genres from tbl_movies ")
+    val array = sqlresult_type.collect
     val map_num=mutable.Map(("Fantasy",0))
     val map_name=mutable.Map(("Fantasy",14))
-    val parser = new JSONParser(JSONParser.BIG_DIGIT_UNRESTRICTED)
+
     for(i <- 0 to array.length-1){
       for(j <- 0 to array(i).length-1){
         val jsonArray = array(i)(j).toString
@@ -61,9 +47,10 @@ object SparkSqlCSVExample {
           val jsonObject = parseJsonArray.getJSONObject(i)
           val id = jsonObject.getInteger("id")
           val name = jsonObject.getString("name")
-          val bs1 =
-            if(map_num.contains(name)) map_num(name)=map_num(name)+1
-            else map_num+=(name->1)
+
+          if(map_num.contains(name)) map_num(name)=map_num(name)+1
+          else map_num+=(name->1)
+
           map_name+=(name->id)
           //println(s"$id is $name")
         }
@@ -99,4 +86,5 @@ object SparkSqlCSVExample {
       .mode(SaveMode.Append)
       .save()
   }
+
 }
