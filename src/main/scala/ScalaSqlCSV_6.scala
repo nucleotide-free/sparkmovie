@@ -29,21 +29,32 @@ object ScalaSqlCSV_6 {
     val map_name = mutable.Map(("Fantasy", 0.00))
 
 
-    for (i <- 0 to array.length - 1) {
-      val jsonArray = array(i)(0).toString//genres
-      val parseJsonArray = JSON.parseArray(jsonArray)
-      val vote_average = array(i)(1).toString.toDouble//revenue
+    val regex="""^\d+$""".r
+    def IsNumber(str: String) = {
+      var flag = true
+      for (i <- 0 until str.length) {
+        if ("0123456789.".indexOf(str.charAt(i)) < 0) flag = false
+      }
+      flag
+    }
 
-      //遍历
-      for (i <- 0 until parseJsonArray.size) {
-        val jsonObject = parseJsonArray.getJSONObject(i)
-        val name = jsonObject.getString("name")
-        //类型统计
-        if(map_num.contains(name)) map_num(name)=map_num(name)+1
-        else map_num+=(name->1)
-        //票房统计
-        if (map_name.contains(name)) map_name(name) = map_name(name) + vote_average
-        else map_name += (name -> vote_average)
+    for (i <- 0 to array.length - 1) {
+      val jsonArray = array(i)(0).toString //genres
+      val parseJsonArray = JSON.parseArray(jsonArray)
+      val vote_average0 = array(i)(1).toString //revenue
+      if (IsNumber(vote_average0)) {
+        val vote_average = array(i)(1).toString.toDouble
+        //遍历
+        for (i <- 0 until parseJsonArray.size) {
+          val jsonObject = parseJsonArray.getJSONObject(i)
+          val name = jsonObject.getString("name")
+          //类型统计
+          if (map_num.contains(name)) map_num(name) = map_num(name) + 1
+          else map_num += (name -> 1)
+          //票房统计
+          if (map_name.contains(name)) map_name(name) = map_name(name) + vote_average
+          else map_name += (name -> vote_average)
+        }
       }
     }
 
@@ -64,7 +75,7 @@ object ScalaSqlCSV_6 {
       .format("jdbc")
       .option("url", "jdbc:mysql://localhost:3306/sparkdb")
       .option("user", "root")
-      .option("password", "123456")
+      .option("password", "100708007sM")
       .option("dbtable", "tbl_movies_type_vote")
       .mode(SaveMode.Append)
       .save()

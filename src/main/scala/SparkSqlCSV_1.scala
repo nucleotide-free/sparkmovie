@@ -10,7 +10,7 @@ import org.apache.spark.sql.SparkSession
 import scala.collection.mutable
 import scala.xml.XML.parser
 
-object SparkSqlCSVExample {
+object SparkSqlCSV_1 {
 
 
 

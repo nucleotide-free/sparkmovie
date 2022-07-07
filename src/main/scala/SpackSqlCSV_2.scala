@@ -5,7 +5,7 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row, SaveMode, SparkSession}
 import com.alibaba.fastjson.JSON
 import scala.collection.mutable
 
-object SpackSqlCSV_2_1 {
+object SpackSqlCSV_2 {
 
   def main(args: Array[String]): Unit = {
     //1.创建Spark环境配置对象
