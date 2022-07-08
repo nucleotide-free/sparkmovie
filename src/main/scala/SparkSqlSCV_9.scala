@@ -3,7 +3,7 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row, SaveMode, SparkSession}
 import com.alibaba.fastjson.JSON
 import scala.collection.mutable
 
-object SparkSqlCSV_1 {
+object SparkSqlCSV_9 {
 
   def main(args: Array[String]): Unit = {
     //1.创建Spark环境配置对象
@@ -15,17 +15,17 @@ object SparkSqlCSV_1 {
     var commentData: DataFrame = spark.read.format("csv")
       .option("header", true)
       .option("multiLine", true)
-      .load("src\\input\\movies_metadata.csv")
+      .load("src\\input\\keywords.csv")
     commentData.show()
 
     //3.注册临时表
-    commentData.createOrReplaceTempView("tbl_movies")
+    commentData.createOrReplaceTempView("tbl_keywords")
 
     //4.查询操作
-    val sqlresult_type :DataFrame = spark.sql("select genres from tbl_movies ")
-    val array = sqlresult_type.collect
-    val map_num = mutable.Map(("Fantasy",0))
-    val map_name = mutable.Map(("Fantasy",14))
+    val sqlresult_words :DataFrame = spark.sql("select keywords from tbl_keywords ")
+    val array = sqlresult_words.collect
+    val map_num = mutable.Map(("Paris",0))
+
 
     for(i <- 0 to array.length-1){
       for(j <- 0 to array(i).length-1){
@@ -40,36 +40,33 @@ object SparkSqlCSV_1 {
           if(map_num.contains(name)) map_num(name) = map_num(name)+1
           else map_num+=(name->1)
 
-          map_name += (name->id)
         }
       }
     }
+
 
     for ((k, v) <- map_num) {
       println("(k,v)：" + k + "===" + v)
     }
 
-    val df1 = map_num.toSeq.toDF("name", "num")
-    df1.createOrReplaceTempView("tbl_type_num")
+    val df1 = map_num.toSeq.toDF("keyword", "num")
+    df1.createOrReplaceTempView("tbl_keyword_num")
 
-    val df2 = map_name.toSeq.toDF("name", "id")
-    df2.createOrReplaceTempView("tbl_type_name")
 
-    val sqlresult_type_num :DataFrame=
-      spark.sql( "select tbl_type_name.name,id,num" +
-        "from tbl_type_num  join tbl_type_name" +
-        "on tbl_type_num.name=tbl_type_name.name")
+//    val sqlresult_type_num :DataFrame=
+//      spark.sql( "select tbl_type_name.name,id,num" +
+//        "from tbl_type_num  join tbl_type_name" +
+//        "on tbl_type_num.name=tbl_type_name.name")
     df1.show()
-    df2.show()
-    sqlresult_type_num.show()
+//    sqlresult_type_num.show()
 
     //5.将分析结果保存到数据表中
-    sqlresult_type_num.write
+    df1.write
       .format("jdbc")
       .option("url","jdbc:mysql://localhost:3306/sparkdb")
       .option("user","root")
-      .option("password","123456" )
-      .option("dbtable","movies_type_num")
+      .option("password","100708007sM" )
+      .option("dbtable","movies_keywords")
       .mode(SaveMode.Append)
       .save()
   }
