@@ -66,7 +66,7 @@ object SparkSqlCSV_5 {
       .format("jdbc")
       .option("url", "jdbc:mysql://localhost:3306/sparkdb")
       .option("user", "root")
-      .option("password", "123456")
+      .option("password", "100708007sM")
       .option("dbtable", "movies_type_revenue")
       .mode(SaveMode.Append)
       .save()

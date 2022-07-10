@@ -68,16 +68,14 @@ object SparkSqlCSV_2 {
     df2.show(160)
 
     val sqlresult_year :DataFrame=
-      spark.sql( "SELECT tbl_year_revenue.year,num,revenue " +
-        "FROM tbl_year_num JOIN tbl_year_revenue " +
-        "ON tbl_year_num.year = tbl_year_revenue.year")
+      spark.sql( "SELECT tbl_year_revenue.year,num,revenue FROM tbl_year_num JOIN tbl_year_revenue ON tbl_year_num.year = tbl_year_revenue.year")
 
     //5.将分析结果保存到数据表中
     sqlresult_year.write
       .format("jdbc")
       .option("url","jdbc:mysql://localhost:3306/sparkdb")
       .option("user","root")
-      .option("password","123456" )
+      .option("password","100708007sM" )
       .option("dbtable","movies_years_num")
       .mode(SaveMode.Append)
       .save()

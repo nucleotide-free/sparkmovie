@@ -58,9 +58,7 @@ object SparkSqlCSV_4 {
     df2.createOrReplaceTempView("tbl_short_name")
 
     val sqlresult_area :DataFrame=
-      spark.sql( "SELECT tbl_short_num.short,name,num " +
-        "FROM tbl_short_num JOIN tbl_short_name " +
-        "ON tbl_short_num.short = tbl_short_name.short")
+      spark.sql( "SELECT tbl_short_num.short,name,num FROM tbl_short_num JOIN tbl_short_name ON tbl_short_num.short = tbl_short_name.short")
     df1.show()
     df2.show()
     sqlresult_area.show()
@@ -70,7 +68,7 @@ object SparkSqlCSV_4 {
       .format("jdbc")
       .option("url", "jdbc:mysql://localhost:3306/sparkdb")
       .option("user", "root")
-      .option("password", "123456")
+      .option("password", "100708007sM")
       .option("dbtable", "movies_area_num")
       .mode(SaveMode.Append)
       .save()
