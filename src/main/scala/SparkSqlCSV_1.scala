@@ -56,9 +56,7 @@ object SparkSqlCSV_1 {
     df2.createOrReplaceTempView("tbl_type_name")
 
     val sqlresult_type_num :DataFrame=
-      spark.sql( "select tbl_type_name.name,id,num" +
-        "from tbl_type_num  join tbl_type_name" +
-        "on tbl_type_num.name=tbl_type_name.name")
+      spark.sql( "select tbl_type_name.name,id,num from tbl_type_num  join tbl_type_name on tbl_type_num.name=tbl_type_name.name")
     df1.show()
     df2.show()
     sqlresult_type_num.show()
@@ -68,7 +66,7 @@ object SparkSqlCSV_1 {
       .format("jdbc")
       .option("url","jdbc:mysql://localhost:3306/sparkdb")
       .option("user","root")
-      .option("password","123456" )
+      .option("password","100708007sM" )
       .option("dbtable","movies_type_num")
       .mode(SaveMode.Append)
       .save()
