@@ -1,8 +1,6 @@
 import com.alibaba.fastjson.JSON
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
-
-import scala.:+
 import scala.collection.mutable
 
 case class MovieTT(MType: String, MTime: String, count: Int)
@@ -62,7 +60,7 @@ object SparkSqlCSV_3 {
       .format("jdbc")
       .option("url", "jdbc:mysql://localhost:3306/sparkdb")
       .option("user", "root")
-      .option("password", "100708007sM")
+      .option("password", "123456")
       .option("dbtable", "movies_type_time_num")
       .mode(SaveMode.Append)
       .save()

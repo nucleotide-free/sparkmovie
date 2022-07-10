@@ -2,6 +2,8 @@ import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import scala.collection.mutable
 
+case class MovieTV(MTime: Int, MVote: Double)
+
 object SparkSqlCSV_8 {
   def main(args: Array[String]): Unit = {
     //1.创建Spark环境配置对象
@@ -23,44 +25,42 @@ object SparkSqlCSV_8 {
     val sqlresult_type: DataFrame =
       spark.sql("select runtime,vote_average from tbl_movies ")
     val array = sqlresult_type.collect
-    var map_time = mutable.Map((100:Int,0:Long))// time vote_average
+    val TVList = mutable.MutableList[MovieTV]()
 
-    val regex="""^\d+$""".r
+    val regex = """^\d+$""".r
+
     def IsNumber(str: String) = {
       var flag = true
       for (i <- 0 until str.length) {
-        if ("0123456789".indexOf(str.charAt(i)) < 0) flag = false
+        if ("0123456789.".indexOf(str.charAt(i)) < 0) flag = false
       }
       flag
     }
 
-    for(i <- 0 to array.length-1) {
+    for (i <- 0 to array.length - 1) {
       if (array(i)(0) != null) {
         val time = array(i)(0).toString.toInt
-        val vote_average0 = array(i)(1).toString
-        if (IsNumber(vote_average0)) {
-          val vote_average = array(i)(1).toString.toLong
-          //票房统计
-          if (map_time.contains(time)) map_time(time) = map_time(time) + vote_average
-          else map_time += (time -> vote_average)
+        if(time>0){
+          val vote_average0 = array(i)(1).toString
+          if (IsNumber(vote_average0)) {
+            val vote_average = array(i)(1).toString.toDouble
+            TVList += MovieTV(time,vote_average)
+          }
         }
       }
     }
 
-    for ((k, v) <- map_time) {
-      println("(k,v)：" + k + "===" + v)
-    }
 
-    val df1 = map_time.toSeq.toDF("time", "vote")
+    val df1 = TVList.toDF("time", "vote")
     df1.createOrReplaceTempView("tbl_time_vote")
     df1.show(40000)
 
     //5.将分析结果保存到数据表中
-    sqlresult_type.write
+    df1.write
       .format("jdbc")
       .option("url", "jdbc:mysql://localhost:3306/sparkdb")
       .option("user", "root")
-      .option("password", "100708007sM")
+      .option("password", "123456")
       .option("dbtable", "movies_time_vote")
       .mode(SaveMode.Append)
       .save()

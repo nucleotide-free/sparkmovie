@@ -1,13 +1,11 @@
-
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SaveMode, SparkSession}
 import com.alibaba.fastjson.JSON
 import scala.collection.mutable
 import org.apache.spark.sql.functions.col
 
-
-
 object SparkSqlCSV_9 {
+
   def main(args: Array[String]): Unit = {
     //1.创建Spark环境配置对象
     val conf = new SparkConf().setAppName("SparkSqlMovie").setMaster("local")
@@ -81,7 +79,7 @@ object SparkSqlCSV_9 {
       .format("jdbc")
       .option("url","jdbc:mysql://localhost:3306/sparkdb")
       .option("user","root")
-      .option("password","100708007sM" )
+      .option("password","123456" )
       .option("dbtable","movies_keywords")
       .mode(SaveMode.Append)
       .save()

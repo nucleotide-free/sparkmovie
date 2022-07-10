@@ -2,6 +2,8 @@ import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SaveMode, SparkSession}
 import scala.collection.mutable
 
+case class MovieTR(MTime: Int, MRevenue: Long)
+
 object SparkSqlCSV_7 {
   def main(args: Array[String]): Unit = {
     //1.创建Spark环境配置对象
@@ -23,7 +25,7 @@ object SparkSqlCSV_7 {
     val sqlresult_type :DataFrame=
     spark.sql("select runtime,revenue from tbl_movies ")
     val array = sqlresult_type.collect
-    var map_time = mutable.Map((100:Int,0:Long))// time Revenue
+    val TRList = mutable.MutableList[MovieTR]()
 
     val regex="""^\d+$""".r
     def IsNumber(str: String) = {
@@ -37,30 +39,28 @@ object SparkSqlCSV_7 {
     for(i <- 0 to array.length-1) {
       if (array(i)(0) != null) {
         val time = array(i)(0).toString.toInt
-        val revenue0 = array(i)(1).toString
-        if (IsNumber(revenue0)) {
-          val revenue = array(i)(1).toString.toLong
-          //票房统计
-          if (map_time.contains(time)) map_time(time) = map_time(time) + revenue
-          else map_time += (time -> revenue)
+        if(time>0){
+          val revenue0 = array(i)(1).toString
+          if (IsNumber(revenue0)) {
+            val revenue = array(i)(1).toString.toLong
+            //票房统计
+            TRList += MovieTR(time,revenue)
+          }
         }
       }
     }
 
-    for ((k, v) <- map_time) {
-      println("(k,v)：" + k + "===" + v)
-    }
 
-    val df1 = map_time.toSeq.toDF("time", "revenue")
+    val df1 = TRList.toDF("time", "revenue")
     df1.createOrReplaceTempView("tbl_time_revenue")
     df1.show(40000)
 
     //5.将分析结果保存到数据表中
-    sqlresult_type.write
+    df1.write
       .format("jdbc")
       .option("url","jdbc:mysql://localhost:3306/sparkdb")
       .option("user","root")
-      .option("password","100708007sM" )
+      .option("password","123456" )
       .option("dbtable","movies_time_revenue")
       .mode(SaveMode.Append)
       .save()
